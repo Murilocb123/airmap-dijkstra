@@ -1,9 +1,10 @@
 package br.com.servicedijkstra.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.DecimalMin;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+
+import javax.validation.constraints.DecimalMin;
 
 
 @Data

@@ -8,7 +8,9 @@ import java.util.ArrayList;
 
 @Data
 public class VerticeDTO {
-
+    
+    @JsonProperty(value = "id")
+    private String idVertice;
     @JsonProperty(value = "connections")
     private ArrayList<ArestaDTO> arestaDataDTO;
     @JsonIgnore
@@ -18,5 +20,5 @@ public class VerticeDTO {
     @JsonIgnore
     private ArrayList<String> idsCaminho = new ArrayList<>();
     @JsonIgnore
-    private String verticePai = null;
+    private String verticePai = "";
 }

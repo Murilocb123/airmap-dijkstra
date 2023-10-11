@@ -35,6 +35,7 @@ public class GrafoHashMapDeserializer extends StdDeserializer<GrafoDTO> {
         for (JsonNode node : root) {
             String id = node.get("id").asText();
             VerticeDTO verticeDTO = new VerticeDTO();
+            verticeDTO.setIdVertice(id);
             verticeDTO.setArestaDataDTO(new ArrayList<>());
             node.get("connections").elements().forEachRemaining(vertice -> {
                 verticeDTO.getArestaDataDTO().add(new ArestaDTO(vertice.get("id").asText(), vertice.get("cost").asDouble()));
