@@ -2,16 +2,18 @@ package br.com.servicedijkstra.enums;
 
 
 public enum StatusOperationEnum {
-    SUCCESS("SUCCESS"),
-    ERROR("ERROR");
+    SUCCESS(200),
+    ERROR(500),
 
-    private String status;
+    NOTFOUND(404);
 
-    StatusOperationEnum(String status) {
+    private int status;
+
+    StatusOperationEnum(int status) {
         this.status = status;
     }
 
-    public String getStatus() {
+    public int getStatus() {
         return status;
     }
 }

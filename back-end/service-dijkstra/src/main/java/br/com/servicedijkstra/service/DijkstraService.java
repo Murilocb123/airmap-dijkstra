@@ -4,6 +4,7 @@ import br.com.servicedijkstra.data.ResultOperationData;
 import br.com.servicedijkstra.dto.GrafoDTO;
 import br.com.servicedijkstra.dto.ServiceReturnDTO;
 import br.com.servicedijkstra.enums.AlgsEnums;
+import br.com.servicedijkstra.enums.StatusOperationEnum;
 import br.com.servicedijkstra.repository.GrafoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.NoSuchElementException;
 
 @Service
 public class DijkstraService {
@@ -19,46 +22,59 @@ public class DijkstraService {
     private GrafoDTO grafoDTO;
 
     ArrayList<ResultOperationData> listRoutes;
+    HashMap<String, String> additionalData;
 
+    /**
+     *  Método que retorna a melhor rota usando Dijkstra
+     */
     public ServiceReturnDTO getBestRoute(String grafoID, String origem, String destino) {
         ServiceReturnDTO serviceReturnDTO = new ServiceReturnDTO();
-        ResultOperationData resultOperationData = new ResultOperationData();
+        ResultOperationData resultOperationData = new ResultOperationData(0.0, "");
         try {
             this.doProcess(grafoID, origem, destino, AlgsEnums.DIJKSTRA);
             resultOperationData.setDistance(grafoDTO.getVerticeMapDto().get(destino).getDistance());
-            resultOperationData.setPath(grafoDTO.getVerticeMapDto().get(destino).getIdsCaminho());
-            serviceReturnDTO.setStatusOperation("SUCCESS");
+            String path = this.getListToString(grafoDTO.getVerticeMapDto().get(destino).getIdsCaminho());
+            resultOperationData.setPath(path);
+            serviceReturnDTO.setStatusOperation(StatusOperationEnum.SUCCESS.getStatus());
             serviceReturnDTO.setMessage("Operação realizada com sucesso");
             serviceReturnDTO.setData(resultOperationData);
-        }catch (Exception e) {
+        }catch (NoSuchElementException e){
+            e.printStackTrace();
             serviceReturnDTO.setMessage(e.getMessage());
-            serviceReturnDTO.setStatusOperation("ERROR");
+            serviceReturnDTO.setStatusOperation(StatusOperationEnum.NOTFOUND.getStatus());
+        }catch (Exception e) {
+            e.printStackTrace();
+            serviceReturnDTO.setMessage(e.getMessage());
+            serviceReturnDTO.setStatusOperation(StatusOperationEnum.ERROR.getStatus());
         }
             return serviceReturnDTO;
     }
-    public ServiceReturnDTO listRoutes(String grafoID, String origem, String destino) {
+
+    /**
+     * Método que lista todas as rotas usando DFS
+     * @return
+     */
+    public ServiceReturnDTO listRoutes(String grafoID, String origem, String destino, int qtd) {
         ServiceReturnDTO serviceReturnDTO = new ServiceReturnDTO();
         try{
             this.doProcess(grafoID, origem, destino, AlgsEnums.All_PATHS);
-            serviceReturnDTO.setStatusOperation("SUCCESS");
+            serviceReturnDTO.setStatusOperation(StatusOperationEnum.SUCCESS.getStatus());
             serviceReturnDTO.setMessage("Operação realizada com sucesso");
-            serviceReturnDTO.setData(this.listRoutes);
+            serviceReturnDTO.setData(this.getRoutesForQTD(qtd));
+            serviceReturnDTO.setAdditionalData(this.additionalData);
+        }catch (NoSuchElementException e){
+            e.printStackTrace();
+            serviceReturnDTO.setMessage(e.getMessage());
+            serviceReturnDTO.setStatusOperation(StatusOperationEnum.NOTFOUND.getStatus());
         }catch (Exception e) {
             e.printStackTrace();
             serviceReturnDTO.setMessage(e.getMessage());
-            serviceReturnDTO.setStatusOperation("ERROR");
-        }
-        try {
-
-            System.out.println(this.listRoutes.size());
-
-        }catch (Exception e){
-            e.printStackTrace();
+            serviceReturnDTO.setStatusOperation(StatusOperationEnum.ERROR.getStatus());
         }
         return serviceReturnDTO;
     }
 
-    private void doProcess(String grafoID, String origem, String destino, AlgsEnums algsEnums) throws Exception{
+    private void doProcess(String grafoID, String origem, String destino, AlgsEnums algsEnums) throws NoSuchElementException{
         grafoRepository.findById(grafoID).ifPresent(grafo -> {grafoDTO = grafo;});
 
         if (grafoDTO != null) {
@@ -70,10 +86,12 @@ public class DijkstraService {
                     this.listAllRoutes(origem, destino);
                     break;
             }
+        }else{
+           throw new NoSuchElementException("Grafo não encontrado", new NoSuchElementException());
         }
     }
 
-    private void dijkstra(String origem, String destino) throws Exception{
+    private void dijkstra(String origem, String destino){
         //Pego meu vertice de origem
         grafoDTO.getVerticeMapDto().get(origem).setDistance(0.0);
         //Insiro a menor distacia
@@ -87,11 +105,18 @@ public class DijkstraService {
                 currentVertice.getArestaDataDTO().forEach(arestaDTO -> {
                     var conexaoVerticeDTO = grafoDTO.getVerticeMapDto().get(arestaDTO.getIdArestaDTO());
                     if (conexaoVerticeDTO.getVerticePai().equals(arestaVerticeID)) {
-                        System.out.println("Vertice já visitado");
+//                        System.out.println("Vertice já visitado");
                         return;
                     }
+
                     var cost = (currentVertice.getDistance() + arestaDTO.getCostDTO());
                     if (conexaoVerticeDTO.getDistance() > cost) {
+//                        if (conexaoVerticeDTO.getIdVertice().equals(destino)){
+//                            System.out.println("Destino encontrado");
+//                        }
+//                        if (conexaoVerticeDTO.getIdVertice().equals(destino)){
+//                            System.out.println("Destino encontrado");
+//                        }
                         conexaoVerticeDTO.setDistance(cost);
                         conexaoVerticeDTO.setVerticePai(arestaVerticeID);
                         conexaoVerticeDTO.setIdsCaminho(new ArrayList<>(currentVertice.getIdsCaminho()));
@@ -117,25 +142,27 @@ public class DijkstraService {
         this.listRoutes = new ArrayList<ResultOperationData>();
         //Pego meu vertice de origem
         grafoDTO.getVerticeMapDto().get(origem).setDistance(0.0);
-        ResultOperationData rota = new ResultOperationData();
-        rota.setPath(new ArrayList<>());
+
+        long time = System.currentTimeMillis();
         if(origem.equals(destino)){
-            rota.setDistance(0.0);
-            rota.getPath().add(origem);
-            this.listRoutes.add(rota);
+            ResultOperationData result = new ResultOperationData(0.0, origem);
+            this.listRoutes.add(result);
             return;
         }
         try {
-            var file = new File("D:\\muril\\Downloads\\teste.txt");
-            System.out.println(file.getAbsolutePath());
-            //var fWrite = new FileWriter(file);
-            FileWriter fWrite = null;
+            var rota = new ArrayList<String>();
+            rota.add(origem);
             //Insiro o vertice de origem
-            this.listAllRoutesUtil(origem, destino, rota, fWrite);
+            this.listAllRoutesUtil(origem, destino, 0.0,rota);
+            int totalTime = (int) (System.currentTimeMillis() - time);
+            this.additionalData = new HashMap<>();
+            this.additionalData.put("totalTime", String.valueOf(totalTime));
+            this.additionalData.put("totalRoutes", String.valueOf(this.listRoutes.size()));
            // fWrite.close();
         }catch (Exception e){
             e.printStackTrace();
         }
+        System.out.println("Tempo de execução: " + (System.currentTimeMillis() - time));
     }
 
 
@@ -143,12 +170,11 @@ public class DijkstraService {
      * Método que lista todas as rotas usando DFS
      *
      */
-    private void listAllRoutesUtil(String atual, String destino, ResultOperationData rota, FileWriter fWrite){
+    private void listAllRoutesUtil(String atual, String destino, double distancia, ArrayList<String> rota){
         //caso o atual for igual ao destino nao a necessidade de continuar
         if(atual.equals(destino)){
-            this.listRoutes.add(rota);
-            rota = new ResultOperationData();
-            rota.setPath(new ArrayList<>());
+            var resultRota = new ResultOperationData(distancia, this.getListToString(rota));
+            this.listRoutes.add(resultRota);
             return;
         }
         grafoDTO.getVerticeMapDto().get(atual).setVisited(true);
@@ -156,9 +182,11 @@ public class DijkstraService {
         var listArestas = grafoDTO.getVerticeMapDto().get(atual).getArestaDataDTO();
         for (var aresta : listArestas) {
             if (!grafoDTO.getVerticeMapDto().get(aresta.getIdArestaDTO()).isVisited()) {
-                rota.setDistance(rota.getDistance() + aresta.getCostDTO());
-                rota.getPath().add(aresta.getIdArestaDTO());
-                listAllRoutesUtil(aresta.getIdArestaDTO(), destino, rota, fWrite);
+                distancia += aresta.getCostDTO();
+                rota.add(aresta.getIdArestaDTO());
+                listAllRoutesUtil(aresta.getIdArestaDTO(), destino, distancia,rota);
+                rota.remove(aresta.getIdArestaDTO());
+                distancia -= aresta.getCostDTO();
             }
         }
         grafoDTO.getVerticeMapDto().get(atual).setVisited(false);
@@ -167,6 +195,20 @@ public class DijkstraService {
 
 
 
+    private String getListToString(ArrayList<String> list){
+        String str = "";
+        int size = list.size();
+        int count = 1;
+        for (var item : list) {
+            if (count == size ) {
+                str += item;
+                break;
+            }
+            str += item + "-";
+            count++;
+        }
+        return str;
+    }
     private  ArrayList<String>  getListCaminho(String destino) {
         var verticePai =grafoDTO.getVerticeMapDto().get(destino).getVerticePai();
         var list = new ArrayList<String>();
@@ -186,5 +228,29 @@ public class DijkstraService {
             }
         });
         return list;
+    }
+    private ArrayList<ResultOperationData> getRoutesForQTD(int qtd){
+        this.listRoutes.sort((o1, o2) -> {
+            if (o1.getDistance() > o2.getDistance()) {
+                return 1;
+            } else if (o1.getDistance() < o2.getDistance()) {
+                return -1;
+            }
+            return 0;
+        });
+        if(qtd <= 0) {
+            return this.listRoutes;
+        }
+        var list = new ArrayList<ResultOperationData>();
+        int count = 1;
+        for (var item : this.listRoutes) {
+            if (count > qtd ) {
+                break;
+            }
+            list.add(item);
+            count++;
+        }
+        return list;
+
     }
 }

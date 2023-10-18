@@ -20,10 +20,13 @@ public class ConfigGrafoService {
         grafoRepository.save(grafoDTO);
         var grafoInsertInfo = new HashMap<String,String>();
         grafoInsertInfo.put("grafoID",grafoDTO.getIdDTO());
-        return new ServiceReturnDTO("Inserido com sucesso", StatusOperationEnum.SUCCESS.toString(), grafoInsertInfo);
+        return new ServiceReturnDTO("Inserido com sucesso", StatusOperationEnum.SUCCESS.getStatus(), null, grafoInsertInfo);
 
     }
     public GrafoDTO findByID(String grafoID) {
+        if (grafoRepository.findById(grafoID).isEmpty()) {
+            throw new RuntimeException("Grafo não encontrado");
+        }
         return grafoRepository.findById(grafoID).get();
 
     }

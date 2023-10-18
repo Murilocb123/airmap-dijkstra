@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ServiceReturnDTO {
     private String message;
-    private String statusOperation;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private int statusOperation;
+    private Object additionalData;
     private Object data;
 }

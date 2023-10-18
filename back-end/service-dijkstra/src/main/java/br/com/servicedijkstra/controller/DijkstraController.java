@@ -19,13 +19,18 @@ public class DijkstraController {
     private DijkstraService dijkstraService;
 
     @GetMapping(value = "/get-best-route")
-    public ServiceReturnDTO listRoutes(@RequestParam(name = "grafoID") String grafoID, @RequestParam(name = "origem") String origem, @RequestParam(name = "destino") String destino){
+    public ServiceReturnDTO listRoutes(@RequestParam(name = "grafoID") String grafoID,
+                                       @RequestParam(name = "origem") String origem,
+                                       @RequestParam(name = "destino") String destino){
         return dijkstraService.getBestRoute(grafoID,origem,destino);
     }
 
     @GetMapping(value = "/list-all-routes")
-    public ServiceReturnDTO listAllRoutes(@RequestParam(name = "grafoID") String grafoID, @RequestParam(name = "origem") String origem, @RequestParam(name = "destino") String destino){
-        return dijkstraService.listRoutes(grafoID,origem,destino);
+    public ServiceReturnDTO listAllRoutes(@RequestParam(name = "grafoID") String grafoID,
+                                          @RequestParam(name = "origem") String origem,
+                                          @RequestParam(name = "destino") String destino,
+                                          @RequestParam(name = "qtd") int qtd){
+        return dijkstraService.listRoutes(grafoID,origem,destino, qtd);
     }
 
 }

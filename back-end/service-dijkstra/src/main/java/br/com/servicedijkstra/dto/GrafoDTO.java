@@ -17,7 +17,7 @@ import org.springframework.data.redis.core.RedisHash;
 import java.util.HashMap;
 
 @Data
-@RedisHash("Grafo")
+@RedisHash(value = "Grafo")
 @AllArgsConstructor
 @JsonDeserialize(using = GrafoHashMapDeserializer.class)
 @JsonSerialize(using = GrafoHashMapSerializer.class)

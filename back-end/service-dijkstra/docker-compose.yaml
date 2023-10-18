@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+    dijkstra:
+        image: dijkstra:1.0
+        container_name: dijkstra
+        build:
+            context: .
+            dockerfile: Dockerfile
+        networks:
+            - dijkstra-network
+        ports:
+            - 8080:${SERVICE_PORT:-8080}
+        depends_on:
+            - redis
+        environment:
+            - REDIS_HOST=redis_host
+            - REDIS_PORT=${REDIS_PORT:-6379}
+    redis:
+        image: redis:7.2.1-alpine
+        container_name: dijkstra_redis
+        hostname: redis_host
+        networks:
+            - dijkstra-network
+        ports:
+            - 6379:${REDIS_PORT:-6379}
+        volumes:
+            - redis-data:/data
+
+volumes:
+    redis-data:
+        driver: local
+
+networks:
+    dijkstra-network:
+        external: false
