@@ -1,8 +1,16 @@
 HELP.md
-target/
+target/classes
+target/maven-archiver
+target/maven-status
+target/generated-sources 
+target/generated-test-sources
+target/test-classes
+target/surefire-reports
+target/*.original
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+!target/service-dijkstra*.jar
 
 ### STS ###
 .apt_generated
