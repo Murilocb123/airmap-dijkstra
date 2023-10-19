@@ -15,3 +15,6 @@ Projeto desenvolvido na materia de estrutura de dados
 ### Melhorias
 -  Implementar autenticação
 -  Inserir Tempo de vida dos dados no rediis
+
+### Diagrama 
+![](./infra/current.excalidraw.png)
