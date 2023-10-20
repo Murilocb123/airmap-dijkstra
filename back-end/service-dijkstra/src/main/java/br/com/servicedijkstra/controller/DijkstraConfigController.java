@@ -5,6 +5,7 @@ import br.com.servicedijkstra.dto.GrafoDTO;
 import br.com.servicedijkstra.dto.ServiceReturnDTO;
 import br.com.servicedijkstra.service.ConfigGrafoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +13,11 @@ import javax.validation.Valid;
 
 @Validated
 @RestController
-@RequestMapping(value="/api/v/1.0/dijkstra/grafo")
+@CrossOrigin(origins = "*" , allowedHeaders = "*", originPatterns = "*")
+@RequestMapping(value="/api/v/1.0/dijkstra/grafo",
+        produces = {
+                MediaType.ALL_VALUE
+})
 public class DijkstraConfigController {
 
     @Autowired
