@@ -16,7 +16,7 @@ public class VerticeDTO {
     @JsonIgnore
     private boolean isVisited = false;
     @JsonIgnore
-    private Double distance = Double.MAX_VALUE; // infinito
+    private  Double distance = Double.MAX_VALUE; // infinito
     @JsonIgnore
     private ArrayList<String> idsCaminho = new ArrayList<>();
     @JsonIgnore

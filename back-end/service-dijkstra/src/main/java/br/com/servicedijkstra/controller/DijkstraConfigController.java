@@ -13,11 +13,8 @@ import javax.validation.Valid;
 
 @Validated
 @RestController
-@CrossOrigin(origins = "*" , allowedHeaders = "*", originPatterns = "*")
-@RequestMapping(value="/api/v/1.0/dijkstra/grafo",
-        produces = {
-                MediaType.ALL_VALUE
-})
+@CrossOrigin(origins = "*")
+@RequestMapping(value="/api/v/1.0/dijkstra/grafo")
 public class DijkstraConfigController {
 
     @Autowired

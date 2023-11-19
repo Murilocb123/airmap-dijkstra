@@ -1,13 +1,15 @@
 package br.com.servicedijkstra.data;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.*;
 
 import java.util.ArrayList;
 
-@Data
+@Getter
+@Setter
+@JsonSerialize
 @AllArgsConstructor
 public class ResultOperationData {
     double distance;
-    String path = "";
+    String path;
 }
